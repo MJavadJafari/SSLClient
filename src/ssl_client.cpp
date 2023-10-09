@@ -196,7 +196,7 @@ static int client_net_send(void *ctx, const unsigned char *buf, size_t len) {
  * \param ssl_client  sslclient_context* - The ssl client context. 
  * \param client      Client* - The client. 
  */
-void ssl_init(sslclient_context *ssl_client, Client *client) {
+void SSLCLIENT_ssl_init(sslclient_context *ssl_client, Client *client) {
   log_v("Init SSL");
   // reset embedded pointers to zero
   memset(ssl_client, 0, sizeof(sslclient_context));
@@ -224,7 +224,7 @@ void ssl_init(sslclient_context *ssl_client, Client *client) {
  * \return int        -3 if PSK key is invalid.
  * \return int        -4 if SSL handshake timeout.
  */
-int start_ssl_client(
+int SSLCLIENT_start_ssl_client(
   sslclient_context *ssl_client,
   const char *host,
   uint32_t port,
@@ -446,7 +446,7 @@ int start_ssl_client(
       memset(buf, 0, sizeof(buf));
       mbedtls_x509_crt_verify_info(buf, sizeof(buf), "  ! ", flags);
       log_e("Failed to verify peer certificate! verification info: %s", buf);
-      stop_ssl_socket(ssl_client, rootCABuff, cli_cert, cli_key);  // It's not safe continue.
+      SSLCLIENT_stop_ssl_socket(ssl_client, rootCABuff, cli_cert, cli_key);  // It's not safe continue.
       break;
     } else {
       log_v("Certificate verified.");
@@ -471,7 +471,7 @@ int start_ssl_client(
 
   if (ret < 0) {
     return handle_error(ret);
-    stop_ssl_socket(ssl_client, rootCABuff, cli_cert, cli_key);
+    SSLCLIENT_stop_ssl_socket(ssl_client, rootCABuff, cli_cert, cli_key);
   } else {
     func_ret = 1;
   }
@@ -487,7 +487,7 @@ int start_ssl_client(
  * \param cli_cert    const char* - The client certificate. 
  * \param cli_key     const char* - The client key. 
  */
-void stop_ssl_socket(sslclient_context *ssl_client, const char *rootCABuff, const char *cli_cert, const char *cli_key) {
+void SSLCLIENT_stop_ssl_socket(sslclient_context *ssl_client, const char *rootCABuff, const char *cli_cert, const char *cli_key) {
   log_v("Cleaning SSL connection.");
   log_v("Stopping SSL client. Current client pointer address: %p", (void *)ssl_client->client);
   
@@ -534,7 +534,7 @@ void stop_ssl_socket(sslclient_context *ssl_client, const char *rootCABuff, cons
  * \param ssl_client  sslclient_context* - The ssl client context. 
  * \return int        The number of bytes to read. 
  */
-int data_to_read(sslclient_context *ssl_client) {
+int SSLCLIENT_data_to_read(sslclient_context *ssl_client) {
   int ret, res;
   ret = mbedtls_ssl_read(&ssl_client->ssl_ctx, NULL, 0);
   //log_e("RET: %i",ret);   //for low level debug
@@ -555,7 +555,7 @@ int data_to_read(sslclient_context *ssl_client) {
   * \param len          size_t - The length of the data. 
   * \return int         The number of bytes sent. 
   */
-int send_ssl_data(sslclient_context *ssl_client, const uint8_t *data, size_t len) {
+int SSLCLIENT_send_ssl_data(sslclient_context *ssl_client, const uint8_t *data, size_t len) {
     // Log contents of ssl_client
   if(ssl_client != nullptr) {
     log_v("ssl_client->client: %p", (void *)ssl_client->client);
@@ -587,7 +587,7 @@ int send_ssl_data(sslclient_context *ssl_client, const uint8_t *data, size_t len
  * \param length          int - The length of the data. 
  * \return size_t            The number of bytes received. 
  */
-int get_ssl_receive(sslclient_context *ssl_client, uint8_t *data, size_t length) {
+int SSLCLIENT_get_ssl_receive(sslclient_context *ssl_client, uint8_t *data, size_t length) {
   log_v( "Reading SSL (%d bytes)", length);   //for low level debug
   int ret = -1;
 
@@ -657,7 +657,7 @@ static bool matchName(const string& name, const string& domainName) {
  * \param domain_name   const char* - The domain name. 
  * \return bool         True if the certificate matches the fingerprint, false otherwise. 
  */
-bool verify_ssl_fingerprint(sslclient_context *ssl_client, const char* fp, const char* domain_name)
+bool SSLCLIENT_verify_ssl_fingerprint(sslclient_context *ssl_client, const char* fp, const char* domain_name)
 {
   // Convert hex string to byte array
   uint8_t fingerprint_local[32];
@@ -704,7 +704,7 @@ bool verify_ssl_fingerprint(sslclient_context *ssl_client, const char* fp, const
 
   // Additionally check if certificate has domain name if provided
   if (domain_name) {
-    return verify_ssl_dn(ssl_client, domain_name);
+    return SSLCLIENT_verify_ssl_dn(ssl_client, domain_name);
   } else {
     return true;
   }
@@ -717,7 +717,7 @@ bool verify_ssl_fingerprint(sslclient_context *ssl_client, const char* fp, const
  * \param domain_name   const char* - The domain name. 
  * \return bool         True if the certificate has the domain name, false otherwise.
  */
-bool verify_ssl_dn(sslclient_context *ssl_client, const char* domain_name)
+bool SSLCLIENT_verify_ssl_dn(sslclient_context *ssl_client, const char* domain_name)
 {
   log_d("domain name: '%s'", (domain_name)?domain_name:"(null)");
   string domain_name_str(domain_name);

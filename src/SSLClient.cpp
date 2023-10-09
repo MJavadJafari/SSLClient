@@ -32,7 +32,7 @@
 SSLClient::SSLClient() {
   _connected = false;
   sslclient = new sslclient_context;
-  ssl_init(sslclient, nullptr);
+  SSLCLIENT_ssl_init(sslclient, nullptr);
   sslclient->handshake_timeout = 120000;
   _CA_cert = NULL;
   _cert = NULL;
@@ -53,7 +53,7 @@ SSLClient::SSLClient() {
 SSLClient::SSLClient(Client* client) {
   _connected = false;
   sslclient = new sslclient_context;
-  ssl_init(sslclient, client);
+  SSLCLIENT_ssl_init(sslclient, client);
   sslclient->handshake_timeout = 120000;
   _CA_cert = NULL;
   _cert = NULL;
@@ -88,7 +88,7 @@ void SSLClient::stop() {
   if (sslclient->client != nullptr) {
     if (sslclient->client >= 0) {
       log_i("Stopping ssl client");
-      stop_ssl_socket(sslclient, _CA_cert, _cert, _private_key);
+      SSLCLIENT_stop_ssl_socket(sslclient, _CA_cert, _cert, _private_key);
     } else {
       log_i("stop() not called because client is < 0");
     }
