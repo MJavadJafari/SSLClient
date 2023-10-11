@@ -227,7 +227,7 @@ int SSLClient::connect(const char *host, uint16_t port, const char *_CA_cert, co
     log_v("Handshake timeout set to: %d", sslclient->handshake_timeout);
   }
 
-  int ret = start_ssl_client(sslclient, host, port, _timeout, _CA_cert, _cert, _private_key, NULL, NULL);
+  int ret = SSLCLIENT_start_ssl_client(sslclient, host, port, _timeout, _CA_cert, _cert, _private_key, NULL, NULL);
   _lastError = ret;
   log_v("Return value from start_ssl_client: %d", ret);
 
@@ -281,7 +281,7 @@ int SSLClient::connect(const char *host, uint16_t port, const char *pskIdent, co
     sslclient->handshake_timeout = _timeout;
   }
 
-  int ret = start_ssl_client(sslclient, host, port, _timeout, NULL, NULL, NULL, _pskIdent, _psKey);
+  int ret = SSLCLIENT_start_ssl_client(sslclient, host, port, _timeout, NULL, NULL, NULL, _pskIdent, _psKey);
   _lastError = ret;
 
   if (ret < 0) {
@@ -369,7 +369,7 @@ size_t SSLClient::write(const uint8_t *buf, size_t size) {
     return 0;
   }
 
-  int res = send_ssl_data(sslclient, buf, size);
+  int res = SSLCLIENT_send_ssl_data(sslclient, buf, size);
   
   if (res < 0) {
     stop();
@@ -415,7 +415,7 @@ int SSLClient::read(uint8_t *buf, size_t size) {
     peeked = 1; // set peeked to 1 to indicate one byte has been read from the peeked value.
   }
 
-  size_t res = get_ssl_receive(sslclient, buf, size);
+  size_t res = SSLCLIENT_get_ssl_receive(sslclient, buf, size);
 
   if (res < 0) {
     stop();
@@ -442,7 +442,7 @@ int SSLClient::available() {
     return peeked;
   }
   
-  int res = data_to_read(sslclient); // how many bytes available to read.
+  int res = SSLCLIENT_data_to_read(sslclient); // how many bytes available to read.
   
   if (res < 0) {
     stop();
@@ -546,7 +546,7 @@ bool SSLClient::verify(const char* fp, const char* domain_name) {
     return false;
   }
 
-  return verify_ssl_fingerprint(sslclient, fp, domain_name);
+  return SSLCLIENT_verify_ssl_fingerprint(sslclient, fp, domain_name);
 }
 
 /**

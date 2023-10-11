@@ -19,7 +19,7 @@
 #  error "Please configure IDF framework to include mbedTLS -> Enable pre-shared-key ciphersuites and activate at least one cipher"
 #endif
 
-const char *pers = "esp32-tls";
+const char *SSLCLIENT_pers = "esp32-tls";
 
 /**
  * \brief           Handle the error.
@@ -29,7 +29,7 @@ const char *pers = "esp32-tls";
  * \param line      int - The line number. 
  * \return int      The error code. 
  */
-static int _handle_error(int err, const char * function, int line) {
+static int _SSLCLIENT_handle_error(int err, const char * function, int line) {
   if(err == -30848) {
     return err;
   }
@@ -49,7 +49,7 @@ static int _handle_error(int err, const char * function, int line) {
   return err;
 }
 
-#define handle_error(e) _handle_error(e, __FUNCTION__, __LINE__)
+#define handle_error(e) _SSLCLIENT_handle_error(e, __FUNCTION__, __LINE__)
 
 /**
  * \brief          Read at most 'len' characters. If no error occurs,
@@ -65,7 +65,7 @@ static int _handle_error(int err, const char * function, int line) {
  * \return int    -1 if Client* is nullptr.
  * \return int    -2 if connect failed.
  */
-static int client_net_recv( void *ctx, unsigned char *buf, size_t len ) {
+static int SSLCLIENT_client_net_recv( void *ctx, unsigned char *buf, size_t len ) {
   Client *client = (Client*)ctx;
   if (!client) { 
     log_e("Uninitialised!");
@@ -101,7 +101,7 @@ static int client_net_recv( void *ctx, unsigned char *buf, size_t len ) {
  * \return int    -1 if Client* is nullptr.
  * \return int    -2 if connect failed.
  */
-int client_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t timeout) {
+int SSLCLIENT_client_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t timeout) {
   Client *client = (Client*)ctx;
 
   log_v("Timeout set to %u", timeout);
@@ -149,7 +149,7 @@ int client_net_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint32_t 
  * \return int    -1 if Client* is nullptr.
  * \return int    -2 if connect failed.
  */
-static int client_net_send(void *ctx, const unsigned char *buf, size_t len) {
+static int SSLCLIENT_client_net_send(void *ctx, const unsigned char *buf, size_t len) {
   Client *client = (Client*)ctx;
   if (!client) { 
     log_e("Uninitialised!");
@@ -269,7 +269,7 @@ int SSLCLIENT_start_ssl_client(
     log_v("Entropy context initialized"); // log_v
 
     ret = mbedtls_ctr_drbg_seed(&ssl_client->drbg_ctx, mbedtls_entropy_func,
-                                &ssl_client->entropy_ctx, (const unsigned char *) pers, strlen(pers));
+                                &ssl_client->entropy_ctx, (const unsigned char *) SSLCLIENT_pers, strlen(SSLCLIENT_pers));
 
     if (ret == MBEDTLS_ERR_CTR_DRBG_ENTROPY_SOURCE_FAILED || ret != 0) {
       break;
@@ -395,7 +395,7 @@ int SSLCLIENT_start_ssl_client(
     // Step 6 - Set up the I/O callbacks (this is the heart of it)
     log_v("Setting up IO callbacks...");
     mbedtls_ssl_set_bio(&ssl_client->ssl_ctx, ssl_client->client,
-                        client_net_send, NULL, client_net_recv_timeout );
+                        SSLCLIENT_client_net_send, NULL, SSLCLIENT_client_net_recv_timeout );
   
     log_v("Setting timeout to %i", timeout);
     mbedtls_ssl_conf_read_timeout(&ssl_client->ssl_conf,  timeout);

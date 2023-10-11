@@ -37,7 +37,7 @@ void test_client_null_context(void) {
   unsigned char buf[100];
   
   // Act
-  int result = client_net_send(NULL, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_send(NULL, buf, sizeof(buf));
   
   // Assert
   TEST_ASSERT_EQUAL_INT(-1, result);
@@ -50,7 +50,7 @@ void test_client_write_succeeds(void) {
 
   // Act
   void* clientPtr = static_cast<void*>(&testClient);
-  int result = client_net_send(clientPtr, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_send(clientPtr, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(3072, result);
@@ -62,7 +62,7 @@ void test_client_write_fails(void) {
   unsigned char buf[3000]; // 3 chunks of data, but it fails on the 3rd chunk
 
   // Act
-  int result = client_net_send(&testClient, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_send(&testClient, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(MBEDTLS_ERR_NET_SEND_FAILED, result);
@@ -73,7 +73,7 @@ void test_zero_length_buffer(void) {
   unsigned char buf[1];
 
   // Act
-  int result = client_net_send(&testClient, buf, 0);
+  int result = SSLCLIENT_client_net_send(&testClient, buf, 0);
   
   // Assert
   TEST_ASSERT_EQUAL_INT(0, result);
@@ -85,7 +85,7 @@ void test_single_chunk_exact(void) {
   testClient.returns("write", (size_t)1024);
 
   // Act
-  int result = client_net_send(&testClient, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_send(&testClient, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(1024, result);
@@ -97,7 +97,7 @@ void test_partial_write(void) {
   testClient.returns("write", (size_t)500).then((size_t)500).then((size_t)500);
 
   // Act
-  int result = client_net_send(&testClient, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_send(&testClient, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(1500, result); // Only half the buffer is sent
@@ -110,7 +110,7 @@ void test_disconnected_client(void) {
   testClient.returns("connected", (uint8_t)0); // Mock the client to return false for "connected" function
 
   // Act
-  int result = client_net_send(&testClient, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_send(&testClient, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(-2, result); // -2 indicates disconnected client
@@ -194,7 +194,7 @@ void test_null_client_context(void) {
   unsigned char buf[100];
 
   // Act
-  int result = client_net_recv(NULL, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_recv(NULL, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(-1, result);
@@ -207,7 +207,7 @@ void test_disconnected_client_client_net_recv(void) {
   unsigned char buf[100];
 
   // Act
-  int result = client_net_recv(&testClient, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_recv(&testClient, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(-2, result);
@@ -219,7 +219,7 @@ void test_successful_client_read(void) {
   testClient.returns("read", (int)50);
 
   // Act
-  int result = client_net_recv(&testClient, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_recv(&testClient, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(50, result);
@@ -231,7 +231,7 @@ void test_failed_client_read(void) {
   testClient.returns("read", (int)0); // Mock a read failure
 
   // Act
-  int result = client_net_recv(&testClient, buf, sizeof(buf));
+  int result = SSLCLIENT_client_net_recv(&testClient, buf, sizeof(buf));
 
   // Assert
   TEST_ASSERT_EQUAL_INT(0, result); // Expecting 0 as read() has failed

@@ -10,6 +10,7 @@
 #include "MbedTLS.h"
 #else
 #include <mbedtls/platform.h>
+#include <mbedtls/config.h>
 #include <mbedtls/sha256.h>
 #include <mbedtls/oid.h>
 #include <mbedtls/net.h>
@@ -21,6 +22,9 @@
 #include <mbedtls/sha256.h>
 #include <mbedtls/oid.h>
 #endif
+
+// set mbedtls buffer size
+#define MBEDTLS_SSL_MAX_CONTENT_LEN 1024
 
 #include <Client.h>
 
